@@ -5,13 +5,6 @@ on:
     # Run at 09:00 UTC on the second Monday of each month
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
-name: Monthly reminder to maintain reasonbench
-
-on:
-  schedule:
-    # Run at 09:00 UTC on the second Monday of each month
-    - cron: "0 9 8-14 * 1"
-  workflow_dispatch:
 
 jobs:
   monthly-reminder:
