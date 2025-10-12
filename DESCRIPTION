@@ -1,0 +1,21 @@
+Package: reasonbench
+Title: Reasonably Perfect Benchmarks for ML Models
+Version: 1.0.0
+Authors@R: 
+    person("Diogo", "Ribeiro", email = "contact@diogoribeiro.ai", role = c("aut", "cre"))
+Description: Provides a robust and extensible framework to evaluate machine learning models 
+    against realistic benchmarks. Implements the concept of 'reasonably-perfect' models 
+    that simulate achievable performance limits under data uncertainty.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    glue,
+    Metrics,
+    purrr,
+    tibble,
+    stats
+Suggests:
+    testthat (>= 3.0.0)
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3

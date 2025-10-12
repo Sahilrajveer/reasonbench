@@ -1,0 +1,9 @@
+^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^CITATION\.cff$
+^CODE_OF_CONDUCT\.md$
+^CONTRIBUTING\.md$
+^\.github$
+^man/figures$

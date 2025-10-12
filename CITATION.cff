@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+title: reasonbench
+message: "If you use this package, please cite it as below."
+type: software
+authors:
+  - family-names: Ribeiro
+    given-names: Diogo
+    orcid: "https://orcid.org/0000-0002-XXXX-XXXX"
+identifiers:
+  - type: url
+    value: "https://github.com/DiogoRibeiro7/reasonbench"
+repository-code: "https://github.com/DiogoRibeiro7/reasonbench"
+license: MIT
+version: "1.0.0"
+date-released: 2025-10-12
+keywords:
+  - benchmarking
+  - model evaluation
+  - stochastic simulation
+  - Poisson
+  - machine learning
+abstract: >
+  The reasonbench package provides a reproducible framework for comparing
+  predictive models against realistic, stochastic performance baselines by
+  simulating reasonably-perfect targets.

@@ -1,0 +1,11 @@
+template:
+  bootstrap: 5
+  bootswatch: flatly
+url: https://diogoribeiro7.github.io/reasonbench
+navbar:
+  title: reasonbench
+  left:
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Articles"
+      href: articles/index.html

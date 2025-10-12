@@ -1,0 +1,19 @@
+---
+title: "Introduction to Reasonably-Perfect Benchmarks"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to Reasonably-Perfect Benchmarks}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```r
+library(reasonbench)
+set.seed(123)
+
+df <- tibble::tibble(
+  target = rpois(2000, lambda = runif(2000, 0.3, 2.5)),
+  pred   = runif(2000, 0.3, 2.5)
+)
+
+evaluate_model(df, "target", "pred", dist = "poisson", n_sim = 20)
