@@ -1,4 +1,9 @@
-# reasonbench <img src="man/figures/logo.png" align="right" width="120"/>
+# reasonbench
+
+[![R-CMD-check](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![made-with-R](https://img.shields.io/badge/Made%20with-R-276DC3.svg)](https://cran.r-project.org/)
+
 
 > **Realistic Benchmarks for Predictive Models**
 
