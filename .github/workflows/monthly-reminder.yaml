@@ -2,7 +2,7 @@ name: Monthly reminder to maintain reasonbench
 
 on:
   schedule:
-    # Run at 09:00 UTC on the second Monday of each month
+    # Second Monday of each month at 09:00 UTC
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
 
@@ -16,6 +16,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # 1️⃣ Find issue by title
       - name: Find existing reminder issue
         id: find_issue
         run: |
@@ -24,24 +25,34 @@ jobs:
             jq -r '.[] | select(.title == "📅 Monthly maintenance reminder") | .number')
           
           if [ -n "$ISSUE_NUMBER" ]; then
-            echo "Found issue #$ISSUE_NUMBER"
             echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
           else
-            echo "No existing issue found."
             echo "issue_number=" >> $GITHUB_OUTPUT
           fi
 
-      - name: Add comment to existing issue
-        if: steps.find_issue.outputs.issue_number != ''
+      # 2️⃣ Create issue if it doesn't exist
+      - name: Create new reminder issue if none exists
+        if: steps.find_issue.outputs.issue_number == ''
+        id: create_issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "📅 Monthly maintenance reminder"
+          content-filepath: .github/reminder-message.md
+          labels: maintenance, reminder
+
+      # 3️⃣ Add comment (always runs — on new or existing issue)
+      - name: Add reminder comment
         run: |
+          ISSUE_NUMBER="${{ steps.find_issue.outputs.issue_number || steps.create_issue.outputs.issue-number }}"
           COMMENT="👋 Hey @DiogoRibeiro7 — it's your **monthly reminder** to check in on \`reasonbench\`!  
 
-          **Tasks to consider:**
+          **Suggested actions:**
           - 🧩 Review open issues and PRs  
           - 🧪 Run \`devtools::check()\` locally  
           - 📚 Update vignettes and documentation  
-          - 🚀 Review the [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)  
-          - 🧠 Plan next benchmarking features  
+          - 🚀 Review [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)  
+          - 🧠 Plan new benchmarking improvements  
 
           _Triggered automatically on $(date -u '+%Y-%m-%d %H:%M UTC')._"
 
@@ -49,13 +60,4 @@ jobs:
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"body\": $COMMENT_ESCAPED}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ steps.find_issue.outputs.issue_number }}/comments"
-
-      - name: Create new reminder issue if none exists
-        if: steps.find_issue.outputs.issue_number == ''
-        uses: peter-evans/create-issue-from-file@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "📅 Monthly maintenance reminder"
-          content-filepath: .github/reminder-message.md
-          labels: maintenance, reminder
+            "https://api.github.com/repos/${{ github.repository }}/issues/${ISSUE_NUMBER}/comments"
