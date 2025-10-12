@@ -16,39 +16,57 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 1️⃣ Fetch basic repo stats
+      # 1️⃣ Compute time window for comparison (30 days ago)
+      - name: Compute time window
+        id: time_window
+        run: |
+          SINCE=$(date -u -d "30 days ago" +"%Y-%m-%dT%H:%M:%SZ")
+          echo "since=$SINCE" >> $GITHUB_OUTPUT
+          echo "Comparison window starts: $SINCE"
+
+      # 2️⃣ Fetch repository statistics
       - name: Gather repository stats
         id: repo_stats
         run: |
           REPO="${{ github.repository }}"
           TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          SINCE="${{ steps.time_window.outputs.since }}"
 
-          # Fetch last commit date on default branch
-          LAST_COMMIT_DATE=$(curl -s -H "Authorization: token $TOKEN" \
+          # Get last commit info
+          LAST_COMMIT=$(curl -s -H "Authorization: token $TOKEN" \
             "https://api.github.com/repos/$REPO/commits?per_page=1" | jq -r '.[0].commit.committer.date')
 
-          # Fetch open PR count
-          OPEN_PRS=$(curl -s -H "Authorization: token $TOKEN" \
-            "https://api.github.com/repos/$REPO/pulls?state=open&per_page=1" \
-            -I | grep -Fi x-total-count | awk '{print $2}' | tr -d '\r')
+          # Get commit count in last 30 days
+          COMMIT_COUNT=$(curl -s -H "Authorization: token $TOKEN" \
+            "https://api.github.com/repos/$REPO/commits?since=$SINCE&per_page=100" | jq length)
 
-          # Fetch open issue count
-          OPEN_ISSUES=$(curl -s -H "Authorization: token $TOKEN" \
-            "https://api.github.com/search/issues?q=repo:$REPO+is:issue+is:open" | jq -r '.total_count')
+          # PR stats
+          OPEN_PRS=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$REPO/pulls?state=open&per_page=1" -I | grep -Fi x-total-count | awk '{print $2}' | tr -d '\r')
+          NEW_PRS=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=repo:$REPO+type:pr+is:open+created:>$SINCE" | jq -r '.total_count')
+          MERGED_PRS=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=repo:$REPO+type:pr+is:closed+merged:>$SINCE" | jq -r '.total_count')
 
-          # Fetch latest workflow run status (R-CMD-check.yaml)
-          WORKFLOW_RUNS=$(curl -s -H "Authorization: token $TOKEN" \
-            "https://api.github.com/repos/$REPO/actions/workflows/R-CMD-check.yaml/runs?per_page=1")
-          LAST_RUN_STATUS=$(echo "$WORKFLOW_RUNS" | jq -r '.workflow_runs[0].conclusion // "unknown"')
-          LAST_RUN_TIME=$(echo "$WORKFLOW_RUNS" | jq -r '.workflow_runs[0].updated_at // "N/A"')
+          # Issue stats
+          OPEN_ISSUES=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=repo:$REPO+is:issue+is:open" | jq -r '.total_count')
+          NEW_ISSUES=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=repo:$REPO+is:issue+created:>$SINCE" | jq -r '.total_count')
+          CLOSED_ISSUES=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/search/issues?q=repo:$REPO+is:issue+closed:>$SINCE" | jq -r '.total_count')
 
-          echo "last_commit=$LAST_COMMIT_DATE" >> $GITHUB_OUTPUT
+          # Last workflow status
+          WF_DATA=$(curl -s -H "Authorization: token $TOKEN" "https://api.github.com/repos/$REPO/actions/workflows/R-CMD-check.yaml/runs?per_page=1")
+          WF_STATUS=$(echo "$WF_DATA" | jq -r '.workflow_runs[0].conclusion // "unknown"')
+          WF_TIME=$(echo "$WF_DATA" | jq -r '.workflow_runs[0].updated_at // "N/A"')
+
+          echo "last_commit=$LAST_COMMIT" >> $GITHUB_OUTPUT
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
           echo "open_prs=$OPEN_PRS" >> $GITHUB_OUTPUT
+          echo "new_prs=$NEW_PRS" >> $GITHUB_OUTPUT
+          echo "merged_prs=$MERGED_PRS" >> $GITHUB_OUTPUT
           echo "open_issues=$OPEN_ISSUES" >> $GITHUB_OUTPUT
-          echo "workflow_status=$LAST_RUN_STATUS" >> $GITHUB_OUTPUT
-          echo "workflow_time=$LAST_RUN_TIME" >> $GITHUB_OUTPUT
+          echo "new_issues=$NEW_ISSUES" >> $GITHUB_OUTPUT
+          echo "closed_issues=$CLOSED_ISSUES" >> $GITHUB_OUTPUT
+          echo "workflow_status=$WF_STATUS" >> $GITHUB_OUTPUT
+          echo "workflow_time=$WF_TIME" >> $GITHUB_OUTPUT
 
-      # 2️⃣ Find existing reminder issue
+      # 3️⃣ Find or create issue
       - name: Find existing reminder issue
         id: find_issue
         run: |
@@ -62,8 +80,7 @@ jobs:
             echo "issue_number=" >> $GITHUB_OUTPUT
           fi
 
-      # 3️⃣ Create issue if it doesn’t exist
-      - name: Create new reminder issue if none exists
+      - name: Create issue if none exists
         if: steps.find_issue.outputs.issue_number == ''
         id: create_issue
         uses: peter-evans/create-issue-from-file@v5
@@ -73,12 +90,12 @@ jobs:
           content-filepath: .github/reminder-message.md
           labels: maintenance, reminder
 
-      # 4️⃣ Add rich stats comment
-      - name: Add reminder comment with stats
+      # 4️⃣ Post comment with delta stats
+      - name: Add monthly summary comment
         run: |
           ISSUE_NUMBER="${{ steps.find_issue.outputs.issue_number || steps.create_issue.outputs.issue-number }}"
 
-          COMMENT="👋 Hey @DiogoRibeiro7 — here’s your **monthly maintenance reminder** for \`reasonbench\` 🚀
+          COMMENT="👋 Hey @DiogoRibeiro7 — your **monthly maintenance summary** for \`reasonbench\` is ready 🚀
 
           ## 📊 Repository Snapshot
           - 🕒 **Last commit:** ${{ steps.repo_stats.outputs.last_commit }}
@@ -86,11 +103,16 @@ jobs:
           - 🐞 **Open issues:** ${{ steps.repo_stats.outputs.open_issues }}
           - ✅ **R CMD check status:** ${{ steps.repo_stats.outputs.workflow_status }} (last run ${{ steps.repo_stats.outputs.workflow_time }})
 
-          ## 🔧 Suggested Actions
-          - Re-run \`devtools::check()\` and review results  
-          - Update vignettes and documentation  
-          - Review [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md) for progress  
-          - Close stale issues and merge pending PRs  
+          ## 🔁 Changes Since Last Reminder
+          - 🧮 **Commits:** ${{ steps.repo_stats.outputs.commit_count }} new
+          - 🧩 **PRs:** +${{ steps.repo_stats.outputs.new_prs }} opened, +${{ steps.repo_stats.outputs.merged_prs }} merged
+          - 🐞 **Issues:** +${{ steps.repo_stats.outputs.new_issues }} opened, +${{ steps.repo_stats.outputs.closed_issues }} closed
+
+          ## 🧠 Suggested Actions
+          - Review unmerged PRs and pending issues  
+          - Update documentation and vignettes  
+          - Run \`devtools::check()\`  
+          - Check [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)
 
           _Triggered automatically on $(date -u '+%Y-%m-%d %H:%M UTC')._"
 
