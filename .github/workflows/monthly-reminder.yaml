@@ -1,0 +1,19 @@
+name: Monthly reminder to maintain reasonbench
+
+on:
+  schedule:
+    # Runs at 9:00 AM on the first Monday of each month
+    - cron: "0 9 8-14 * 1"
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update reminder issue
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "📅 Monthly maintenance reminder"
+          content-filepath: .github/reminder-message.md
+          labels: maintenance, reminder
+          token: ${{ secrets.GITHUB_TOKEN }}
