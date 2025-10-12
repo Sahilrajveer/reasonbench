@@ -1,27 +1,20 @@
 # reasonbench
 
-[![R-CMD-check](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![made-with-R](https://img.shields.io/badge/Made%20with-R-276DC3.svg)](https://cran.r-project.org/)
-
+[![R-CMD-check](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![made-with-R](https://img.shields.io/badge/Made%20with-R-276DC3.svg)](https://cran.r-project.org/) [![Codecov](https://codecov.io/gh/DiogoRibeiro7/reasonbench/branch/main/graph/badge.svg)](https://app.codecov.io/gh/DiogoRibeiro7/reasonbench)
 
 > **Realistic Benchmarks for Predictive Models**
 
-`reasonbench` provides tools to evaluate machine learning models against *realistic* stochastic baselines.
-Instead of comparing your model only to a *no-skill* or *perfect* predictor, it estimates a **reasonably-perfect benchmark**—the lowest achievable error given the inherent randomness of your data.
+`reasonbench` provides tools to evaluate machine learning models against _realistic_ stochastic baselines. Instead of comparing your model only to a _no-skill_ or _perfect_ predictor, it estimates a **reasonably-perfect benchmark**--the lowest achievable error given the inherent randomness of your data.
 
----
+--------------------------------------------------------------------------------
 
 ## 🧭 Motivation
 
-In many ML problems (e.g., ad-click prediction, counts, probabilities, continuous regression), there’s irreducible noise:
-even an ideal model cannot make perfect predictions.
-Traditional benchmarking that compares models to a perfect zero-error predictor misrepresents reality.
+In many ML problems (e.g., ad-click prediction, counts, probabilities, continuous regression), there's irreducible noise: even an ideal model cannot make perfect predictions. Traditional benchmarking that compares models to a perfect zero-error predictor misrepresents reality.
 
-`reasonbench` bridges this gap by simulating outcomes from the **data-generating process** (e.g., Poisson, Normal, Binomial).
-It computes what a “reasonably perfect” model would look like statistically—allowing fair, domain-aware evaluation.
+`reasonbench` bridges this gap by simulating outcomes from the **data-generating process** (e.g., Poisson, Normal, Binomial). It computes what a "reasonably perfect" model would look like statistically--allowing fair, domain-aware evaluation.
 
----
+--------------------------------------------------------------------------------
 
 ## ⚙️ Installation
 
@@ -31,7 +24,7 @@ if (!require("devtools")) install.packages("devtools")
 devtools::install_github("DiogoRibeiro7/reasonbench")
 ```
 
----
+--------------------------------------------------------------------------------
 
 ## 🚀 Quick Start
 
@@ -59,23 +52,22 @@ Example output:
 3 Your Model         0.89  1.34  0.52
 ```
 
----
+--------------------------------------------------------------------------------
 
 ## 🧩 Supported Distributions
 
-| Type              | Distribution         | Suitable for               | Function  |
-| ----------------- | -------------------- | -------------------------- | --------- |
-| Poisson           | Count data           | event counts               | `rpois`   |
-| Negative Binomial | Overdispersed counts | social metrics             | `rnbinom` |
-| Binomial          | Binary targets       | classification             | `rbinom`  |
-| Normal            | Continuous data      | regression                 | `rnorm`   |
-| Beta              | Bounded (0–1) data   | rates, probabilities       | `rbeta`   |
-| Student-t         | Heavy-tailed         | finance, noise-robust data | `rt`      |
+Type              | Distribution         | Suitable for               | Function
+----------------- | -------------------- | -------------------------- | ---------
+Poisson           | Count data           | event counts               | `rpois`
+Negative Binomial | Overdispersed counts | social metrics             | `rnbinom`
+Binomial          | Binary targets       | classification             | `rbinom`
+Normal            | Continuous data      | regression                 | `rnorm`
+Beta              | Bounded (0–1) data   | rates, probabilities       | `rbeta`
+Student-t         | Heavy-tailed         | finance, noise-robust data | `rt`
 
-Each distribution represents a plausible **data-generating process**.
-The reasonably-perfect model samples synthetic targets under that process, establishing the **best achievable performance**.
+Each distribution represents a plausible **data-generating process**. The reasonably-perfect model samples synthetic targets under that process, establishing the **best achievable performance**.
 
----
+--------------------------------------------------------------------------------
 
 ## 📊 Example: Binary Classification
 
@@ -88,18 +80,17 @@ df_bin <- tibble::tibble(
 evaluate_model(df_bin, "target", "pred", dist = "binomial", n_sim = 50)
 ```
 
----
+--------------------------------------------------------------------------------
 
 ## 🧠 Interpretation
 
-* **No-skill model:** predicts the overall mean.
-* **Reasonably-perfect model:** the best expected performance given the stochastic process.
-* **Your model:** the actual model under evaluation.
+- **No-skill model:** predicts the overall mean.
+- **Reasonably-perfect model:** the best expected performance given the stochastic process.
+- **Your model:** the actual model under evaluation.
 
-If your model’s MAE or MSE lies close to the “reasonably-perfect” benchmark,
-you are approaching the limit of what is statistically possible given data noise.
+If your model's MAE or MSE lies close to the "reasonably-perfect" benchmark, you are approaching the limit of what is statistically possible given data noise.
 
----
+--------------------------------------------------------------------------------
 
 ## 📄 Citation
 
@@ -112,7 +103,7 @@ https://github.com/DiogoRibeiro7/reasonbench
 
 A formal `CITATION.cff` file is included in the repository.
 
----
+--------------------------------------------------------------------------------
 
 ## 🤝 Contributing
 
@@ -122,23 +113,21 @@ Contributions are welcome:
 2. Run `devtools::check()` before submitting.
 3. Add tests in `tests/testthat/`.
 
-Follow the tidyverse style guide:
-[https://style.tidyverse.org](https://style.tidyverse.org)
+Follow the tidyverse style guide: <https://style.tidyverse.org>
 
----
+--------------------------------------------------------------------------------
 
 ## 🧾 License
 
 Licensed under the [MIT License](LICENSE).
 
----
+--------------------------------------------------------------------------------
 
 ## 🧩 See Also
 
-* `simulate_reasonably_perfect_target()` — stochastic simulation of plausible outcomes.
-* `evaluate_model()` — benchmark your model’s performance realistically.
+- `simulate_reasonably_perfect_target()` -- stochastic simulation of plausible outcomes.
+- `evaluate_model()` -- benchmark your model's performance realistically.
 
----
+--------------------------------------------------------------------------------
 
-**Maintained by [Diogo Ribeiro](https://diogoribeiro7.github.io/)**
-© 2025 — Released under MIT License
+**Maintained by [Diogo Ribeiro](https://diogoribeiro7.github.io/)** © 2025 -- Released under MIT License
