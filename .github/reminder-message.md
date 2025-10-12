@@ -1,12 +1,10 @@
 Hey Diogo 👋
 
-This is your **monthly reminder** to dedicate some time to improving **reasonbench**!
+This is the **main issue** used for monthly maintenance reminders.
 
-Here are some things you can do:
-- 🧩 Check open issues and PRs
-- 🧪 Run `devtools::check()` and verify dependencies
-- 📚 Update vignettes and documentation
-- 🚀 Review the ROADMAP for upcoming goals
-- 🧠 Plan next features for benchmarking and visualization
+Each month, this issue will receive a new comment with a checklist of maintenance actions.
 
-*(Automated monthly workflow — no manual action required.)*
+To disable, pause, or edit the schedule, modify `.github/workflows/monthly-reminder.yaml`.
+
+*(Automated workflow — no manual action required.)*
+
