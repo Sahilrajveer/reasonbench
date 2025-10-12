@@ -2,7 +2,7 @@ name: Monthly reminder to maintain reasonbench
 
 on:
   schedule:
-    # Run at 09:00 UTC on the second Monday of each month
+    # Second Monday of each month at 09:00 UTC
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
 
@@ -16,23 +16,23 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Create or update reminder issue
-        id: reminder
-        uses: peter-evans/create-issue-from-file@v5
+      # 1️⃣ Try to find the reminder issue
+      - name: Find existing reminder issue
+        id: find
+        uses: peter-evans/find-issue@v3
         with:
-          title: "📅 Monthly maintenance reminder"
-          content-filepath: .github/reminder-message.md
-          labels: maintenance, reminder
           token: ${{ secrets.GITHUB_TOKEN }}
-          update_existing: true  # ✅ correct key spelling
+          title: "📅 Monthly maintenance reminder"
 
-      - name: Add monthly comment to reminder issue
+      # 2️⃣ If found, comment on it
+      - name: Add monthly comment
+        if: steps.find.outputs.issue-number != ''
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ steps.reminder.outputs.issue-number }}
+          issue-number: ${{ steps.find.outputs.issue-number }}
           body: |
-            👋 **Monthly reminder:** It's time to check in on `reasonbench`!
+            👋 **Monthly reminder:** It’s time to check in on `reasonbench`!
 
             - 🧩 Review open issues and PRs  
             - 🧪 Re-run `devtools::check()` locally  
@@ -41,3 +41,13 @@ jobs:
             - 🧠 Plan next steps for realistic benchmarking improvements  
 
             _Triggered automatically on ${{ github.run_started_at }} UTC_
+
+      # 3️⃣ If not found, create it
+      - name: Create new reminder issue
+        if: steps.find.outputs.issue-number == ''
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "📅 Monthly maintenance reminder"
+          content-filepath: .github/reminder-message.md
+          labels: maintenance, reminder
