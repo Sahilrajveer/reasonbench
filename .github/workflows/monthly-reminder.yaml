@@ -5,6 +5,13 @@ on:
     # Run at 09:00 UTC on the second Monday of each month
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
+name: Monthly reminder to maintain reasonbench
+
+on:
+  schedule:
+    # Run at 09:00 UTC on the second Monday of each month
+    - cron: "0 9 8-14 * 1"
+  workflow_dispatch:
 
 jobs:
   monthly-reminder:
@@ -34,19 +41,21 @@ jobs:
       - name: Add comment to existing issue
         if: steps.find_issue.outputs.issue_number != ''
         run: |
-          COMMENT="👋 **Monthly reminder:** It's time to check in on \`reasonbench\`!
+          COMMENT="👋 Hey @DiogoRibeiro7 — it's your **monthly reminder** to check in on \`reasonbench\`!  
 
-          - 🧩 Review open issues and PRs
-          - 🧪 Run devtools::check() locally
-          - 📚 Update vignettes and docs
-          - 🚀 Review the ROADMAP.md
-          - 🧠 Plan next features
+          **Tasks to consider:**
+          - 🧩 Review open issues and PRs  
+          - 🧪 Run \`devtools::check()\` locally  
+          - 📚 Update vignettes and documentation  
+          - 🚀 Review the [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)  
+          - 🧠 Plan next benchmarking features  
 
           _Triggered automatically on $(date -u '+%Y-%m-%d %H:%M UTC')._"
 
+          COMMENT_ESCAPED=$(echo "$COMMENT" | jq -Rs .)
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"body\": \"$COMMENT\"}" \
+            -d "{\"body\": $COMMENT_ESCAPED}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ steps.find_issue.outputs.issue_number }}/comments"
 
       - name: Create new reminder issue if none exists
