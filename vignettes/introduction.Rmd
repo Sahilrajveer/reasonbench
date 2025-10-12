@@ -1,6 +1,8 @@
 ---
 title: "Introduction to Reasonably-Perfect Benchmarks"
-output: rmarkdown::html_vignette
+output:
+  rmarkdown::html_vignette:
+    pandoc_args: ["--syntax-highlighting=pygments"]
 vignette: >
   %\VignetteIndexEntry{Introduction to Reasonably-Perfect Benchmarks}
   %\VignetteEngine{knitr::rmarkdown}
