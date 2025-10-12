@@ -117,6 +117,16 @@ Follow the tidyverse style guide: <https://style.tidyverse.org>
 
 --------------------------------------------------------------------------------
 
+## 📰 Changelog / News
+
+You can follow version history and planned releases here:
+
+- 📘 [NEWS.md](NEWS.md) — detailed release notes (CRAN-style)  
+- 📗 [ROADMAP.md](ROADMAP.md) — planned features and development directions  
+- 📙 [CHANGELOG.md](CHANGELOG.md) *(optional GitHub-friendly version)*
+
+--------------------------------------------------------------------------------
+
 ## 🧾 License
 
 Licensed under the [MIT License](LICENSE).
