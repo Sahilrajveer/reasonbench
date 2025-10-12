@@ -1,6 +1,8 @@
 # reasonbench
 
 [![R-CMD-check](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/R-CMD-check.yaml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![made-with-R](https://img.shields.io/badge/Made%20with-R-276DC3.svg)](https://cran.r-project.org/) [![Codecov](https://codecov.io/gh/DiogoRibeiro7/reasonbench/branch/main/graph/badge.svg)](https://app.codecov.io/gh/DiogoRibeiro7/reasonbench)
+[![Monthly Reminder](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/monthly-reminder.yaml/badge.svg)](https://github.com/DiogoRibeiro7/reasonbench/actions/workflows/monthly-reminder.yaml)
+
 
 > **Realistic Benchmarks for Predictive Models**
 
