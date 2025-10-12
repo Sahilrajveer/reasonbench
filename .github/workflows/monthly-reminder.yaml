@@ -2,7 +2,7 @@ name: Monthly reminder to maintain reasonbench
 
 on:
   schedule:
-    # Second Monday of each month at 09:00 UTC
+    # Run at 09:00 UTC on the second Monday of each month
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
 
@@ -16,35 +16,41 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 1️⃣ Try to find the reminder issue
       - name: Find existing reminder issue
-        id: find
-        uses: peter-evans/find-issue@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "📅 Monthly maintenance reminder"
+        id: find_issue
+        run: |
+          ISSUE_NUMBER=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues?state=open&per_page=100" |
+            jq -r '.[] | select(.title == "📅 Monthly maintenance reminder") | .number')
+          
+          if [ -n "$ISSUE_NUMBER" ]; then
+            echo "Found issue #$ISSUE_NUMBER"
+            echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+          else
+            echo "No existing issue found."
+            echo "issue_number=" >> $GITHUB_OUTPUT
+          fi
 
-      # 2️⃣ If found, comment on it
-      - name: Add monthly comment
-        if: steps.find.outputs.issue-number != ''
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ steps.find.outputs.issue-number }}
-          body: |
-            👋 **Monthly reminder:** It’s time to check in on `reasonbench`!
+      - name: Add comment to existing issue
+        if: steps.find_issue.outputs.issue_number != ''
+        run: |
+          COMMENT="👋 **Monthly reminder:** It's time to check in on \`reasonbench\`!
 
-            - 🧩 Review open issues and PRs  
-            - 🧪 Re-run `devtools::check()` locally  
-            - 📚 Update documentation and vignettes  
-            - 🚀 Review the [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)  
-            - 🧠 Plan next steps for realistic benchmarking improvements  
+          - 🧩 Review open issues and PRs
+          - 🧪 Run devtools::check() locally
+          - 📚 Update vignettes and docs
+          - 🚀 Review the ROADMAP.md
+          - 🧠 Plan next features
 
-            _Triggered automatically on ${{ github.run_started_at }} UTC_
+          _Triggered automatically on $(date -u '+%Y-%m-%d %H:%M UTC')._"
 
-      # 3️⃣ If not found, create it
-      - name: Create new reminder issue
-        if: steps.find.outputs.issue-number == ''
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\": \"$COMMENT\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ steps.find_issue.outputs.issue_number }}/comments"
+
+      - name: Create new reminder issue if none exists
+        if: steps.find_issue.outputs.issue_number == ''
         uses: peter-evans/create-issue-from-file@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
