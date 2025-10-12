@@ -2,33 +2,34 @@ name: Monthly reminder to maintain reasonbench
 
 on:
   schedule:
-    # Run at 09:00 UTC on the second Monday of each month
+    # Second Monday of each month at 09:00 UTC
     - cron: "0 9 8-14 * 1"
   workflow_dispatch:
 
 jobs:
   monthly-reminder:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Ensure reminder issue exists
-        id: create_issue
-        uses: peter-evans/create-issue-from-file@v5
+      - name: Create or update reminder issue
+        id: reminder
+        uses: peter-evans/create-or-update-issue-from-file@v4
         with:
           title: "📅 Monthly maintenance reminder"
           content-filepath: .github/reminder-message.md
           labels: maintenance, reminder
           token: ${{ secrets.GITHUB_TOKEN }}
-          update-existing: true
 
       - name: Add monthly comment to reminder issue
         uses: peter-evans/create-or-update-comment@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ steps.create_issue.outputs.issue-number }}
+          issue-number: ${{ steps.reminder.outputs.issue-number }}
           body: |
             👋 **Monthly reminder:** It's time to check in on `reasonbench`!
 
@@ -38,4 +39,4 @@ jobs:
             - 🚀 Review the [ROADMAP.md](https://github.com/DiogoRibeiro7/reasonbench/blob/main/ROADMAP.md)  
             - 🧠 Plan next steps for realistic benchmarking improvements  
 
-            _Posted automatically on the second Monday of the month._
+            _Triggered on ${{ github.event.repository.updated_at }}_
